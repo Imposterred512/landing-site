@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View</title>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <h1 style="">Лендинг сайт</h1>
+    <form action="/viewSingle" method="post">
+        <label for="date_start">Начало:</label>
+        <input id="date_start" type="date" name="date_start" required>
+        <label for="date_end">Конец:</label>
+        <input id="date_end" type="date" name="date_end" required>
+        <button type="submit">Отправить</button>
+    </form>
+    <div id="Chart"><canvas id="myChart" width="400" height="400"></canvas></div>
+
+    <script>
+        var temperatures = [];
+        var humiditys = [];
+        var pressures = [];
+        var dates = [];
+        var boundaries = [];
+
+        console.log(dates);
+
+        getDataAndProcessing();
+
+        diagram(dates, temperatures, humiditys, pressures);
+
+        function getDataAndProcessing() {
+            temperatures = <%= JSON.stringify(temperatures) %>;
+            humiditys = <%= JSON.stringify(humiditys) %>;
+            pressures = <%= JSON.stringify(pressures) %>;
+            temp_dates = <%= JSON.stringify(dates) %>;
+            for (var i = 0; i < temperatures.length; i++) {
+                dates[i] = temp_dates[i][0] + ":" + temp_dates[i][1] + ":" + temp_dates[i][2] + ":" + temp_dates[i][3];
+            }
+            boundaries = <%= JSON.stringify(boundaries) %>;
+        }
+
+
+        function diagram(colvos, temperatures, humiditys, pressures) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: colvos,
+                    datasets: [
+                        {
+                            label: 'Температура',
+                            data: temperatures,
+                            borderWidth: 1,
+                            borderColor: "blue",
+                            pointBackgroundColor: function (context) {
+                                const value = context.raw;
+                                return value > boundaries[0] ? 'red' : 'blue';
+                            },
+                            pointRadius: function (context) {
+                                const value = context.raw;
+                                return value > boundaries[0] ? 5 : 0;
+                            },
+                        },
+                        {
+                            label: 'Давление',
+                            data: pressures,
+                            borderWidth: 1,
+                            borderColor: "orange",
+                            pointBackgroundColor: function (context) {
+                                const value = context.raw;
+                                return value > boundaries[2] ? 'red' : 'orange';
+                            },
+                            pointRadius: function (context) {
+                                const value = context.raw;
+                                return value > boundaries[2] ? 5 : 0;
+                            },
+                        },
+                        {
+                            label: 'Влажность',
+                            data: humiditys,
+                            borderWidth: 1,
+                            borderColor: "green",
+                            pointBackgroundColor: function (context) {
+                                const value = context.raw;
+                                return value > boundaries[1] ? 'red' : 'green';
+                            },
+                            pointRadius: function (context) {
+                                const value = context.raw;
+                                return value > boundaries[1] ? 5 : 0;
+                            },
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
