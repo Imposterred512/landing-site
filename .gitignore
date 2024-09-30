@@ -1,0 +1,4 @@
+node_modules/
+
+/rebuild.bat
+/start.bat
